@@ -1,0 +1,128 @@
+version: "2.1"
+services:
+
+  # prowlarr:
+  #   image: lscr.io/linuxserver/prowlarr:develop
+  #   container_name: prowlarr
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #   volumes:
+  #     - ./prowlarr/data:/config
+  #   ports:
+  #     - 9696:9696
+  #   restart: unless-stopped
+  #   networks:
+  #     - network_docker-mt
+
+  # overseerr:
+  #   image: lscr.io/linuxserver/overseerr:latest
+  #   container_name: overseerr
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/New_York
+  #   volumes:
+  #     - ./overserr/config:/config
+  #   ports:
+  #     - 5055:5055
+  #   restart: unless-stopped 
+  #   networks:
+  #     - network_docker-mt
+
+  # radarr:
+  #   image: lscr.io/linuxserver/radarr:latest
+  #   container_name: radarr
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #   volumes:
+  #     - ./radarr/data:/config
+  #     - ./radarr/movies:/movies #optional
+  #     - ./radarr/downloads:/downloads #optional
+  #   ports:
+  #     - 7878:7878
+  #   restart: unless-stopped
+  #   networks:
+  #     - network_docker-mt
+
+  # sonarr:
+  #   image: lscr.io/linuxserver/sonarr:latest
+  #   container_name: sonarr
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #   volumes:
+  #     - ./sonarr/data:/config
+  #     - ./sonarr/tvseries:/tv #optional
+  #     - ./sonarr/downloads:/downloads #optional
+  #   ports:
+  #     - 8989:8989
+  #   restart: unless-stopped
+  #   networks:
+  #     - network_docker-mt
+
+  plex_container:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      # - PLEX_CLAIM=claim-s39hMaujYyctnXJH5kjF
+    volumes:
+      - ./plex/library:/config
+      - ./plex/tvseries:/tv
+      - ./plex/movies:/movies
+    restart: unless-stopped
+    ports:
+      - 32400:32400
+    depends_on:
+      - swag_container
+    networks:
+      - network_docker-mt
+     
+  swag_container:
+    image: linuxserver/swag:latest
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - SUBDOMAINS=wildcard
+      - VALIDATION=duckdns
+      - URL=marouane.duckdns.org
+      - DUCKDNSTOKEN=e0ba11da-c274-4c23-bba2-58f27d0fabee
+    volumes:
+      - ./swag/config/:/config
+    restart: unless-stopped 
+    ports:
+      - 443:443
+    networks:
+      - network_docker-mt
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - ./bazarr/config:/config
+      - ./movies:/movies #optional
+      - ./tv:/tv #optional
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+    networks:
+      - network_docker-mt
+
+networks:
+  network_docker-mt:
+    external: true
